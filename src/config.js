@@ -125,7 +125,7 @@ function buildLevelGridNew() {
   const mainroad      =  {x: 15, y:2, w:5, h:chapel.y-3}; //the main road from the court to the chapel
   const tempter       = { x: 2, y: 14, w: 11, h: 5 };  // encounter 1
   const brother       = { x: mainroad.x+mainroad.w+1, y: 14, w: 10, h: 5 }; // encounter 2
-  const ladder        = { x: 27, y: chapel.y, w: 5, h: 5 };  // encounter 3 + Ladder gate
+  const ladder        = { x: 27, y: chapel.y-10, w: 5, h: 5 };  // encounter 3 + Ladder gate
   
 
   for (const r of [court, chapel, tempter, brother, ladder, mainroad]) carveRoom(g, r.x, r.y, r.w, r.h);
@@ -133,6 +133,7 @@ function buildLevelGridNew() {
   // --- corridors (a gentle U) ----------------------------------------------
   carveRow(g, 4, 12, 14);          // court -> mainroad
   carveRow(g, 13, 2, 31);          // bottom spine (tempter -> brother -> ladder)
+  carveRow(g, 98, 20, 27);
   carveCol(g, mainroad.x+2, chapel.y-1,chapel.y-1)
   //carveCol(g, 7, 7, 12);           // court -> bottom spine (left leg)
 
@@ -171,7 +172,9 @@ function buildLevelGridNew() {
 
 
   // columns
-   add(18, 4, 'c'); add(28, 16, 'c'); add(31, 16, 'c');
+  add(18, 4, 'c'); 
+  add(28, 16, 'c'); 
+  add(31, 16, 'c');
   
 
   //court decor
@@ -213,4 +216,4 @@ export function validateLevel() {
 }
 
 //console.log(LEVEL.grid)
-//printLevel(LEVEL) //Uncomment this for map editing
+printLevel(LEVEL)
