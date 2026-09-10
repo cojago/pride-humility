@@ -13,7 +13,7 @@ export const ACCEL = 60;
 export const FRICTION = 12;
 
 export const MAP_W = 34;
-export const MAP_H = 22;
+export const MAP_H = 128;
 
 // Byzantine Parchment Pixel palette (from byzantine/DESIGN-HANDOFF.md)
 export const PALETTE = {
@@ -52,15 +52,19 @@ function carveCol(g, x, y0, y1) {
   for (let j = Math.min(y0, y1); j <= Math.max(y0, y1); j++) g[j][x] = F;
 }
 
+/*
 function buildLevelGrid() {
   const g = makeGrid(MAP_W, MAP_H, W);
 
   // --- rooms ---------------------------------------------------------------
-  const court   = { x: 2, y: 2, w: 10, h: 5 };   // gate court (open sky)
+  //const room = {x: start, y: start, w: width, h: height}
+
+    const court   = { x: 2, y: 2, w: 10, h: 5 };   // gate court (open sky)
   const chapel  = { x: 15, y: 2, w: 12, h: 6 };  // confession + elder
   const tempter = { x: 2, y: 14, w: 11, h: 5 };  // encounter 1
   const brother = { x: 15, y: 14, w: 10, h: 5 }; // encounter 2
   const ladder  = { x: 27, y: 14, w: 5, h: 5 };  // encounter 3 + Ladder gate
+  
 
   for (const r of [court, chapel, tempter, brother, ladder]) carveRoom(g, r.x, r.y, r.w, r.h);
 
@@ -110,8 +114,93 @@ function buildLevelGrid() {
 
   return { grid: g, cells, rooms: { court, chapel, tempter, brother, ladder } };
 }
+*/
 
-export const LEVEL = buildLevelGrid();
+function buildLevelGridNew() {
+  const g = makeGrid(MAP_W, MAP_H, W);
+
+  // --- rooms ---------------------------------------------------------------
+  const court         = { x: 2, y: 2, w: 10, h: 5 };   // gate court (open sky)
+  const chapel        = { x: 12, y: MAP_H-20, w: 11, h: 6 };  // confession + elder
+  const mainroad      =  {x: 15, y:2, w:5, h:chapel.y-3}; //the main road from the court to the chapel
+  const tempter       = { x: 2, y: 14, w: 11, h: 5 };  // encounter 1
+  const brother       = { x: mainroad.x+mainroad.w+1, y: 14, w: 10, h: 5 }; // encounter 2
+  const ladder        = { x: 27, y: chapel.y, w: 5, h: 5 };  // encounter 3 + Ladder gate
+  
+
+  for (const r of [court, chapel, tempter, brother, ladder, mainroad]) carveRoom(g, r.x, r.y, r.w, r.h);
+
+  // --- corridors (a gentle U) ----------------------------------------------
+  carveRow(g, 4, 12, 14);          // court -> mainroad
+  carveRow(g, 13, 2, 31);          // bottom spine (tempter -> brother -> ladder)
+  carveCol(g, mainroad.x+2, chapel.y-1,chapel.y-1)
+  //carveCol(g, 7, 7, 12);           // court -> bottom spine (left leg)
+
+  // --- wood floors in chapel, brother's cell --------------------------------
+  for (const [rx, ry, rw, rh] of [[chapel.x, chapel.y, chapel.w, chapel.h], [brother.x, brother.y, brother.w, brother.h]]) {
+    for (let j = ry; j < ry + rh; j++) for (let i = rx; i < rx + rw; i++) if (g[j][i] === F) g[j][i] = '_';
+  }
+
+  const cells = new Map(); // 'i,j' -> tile
+  const floorTiles = new Set(['.', '_']);
+  const add = (x, y, t) => {
+    if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H) return;
+    if (!floorTiles.has(g[y][x])) return;
+    g[y][x] = t;
+    cells.set(`${x},${y}`, t);
+  };
+
+  // --- key spots (placed first so decor can't claim their cells) ------------------
+  
+  add(court.x+2, court.y+3, 'S');            // pilgrim start
+  add(chapel.x+2, chapel.y+chapel.h/2-1, 'E');           // elder (NPC)
+  add(chapel.x+5, chapel.y+5, 'A');  // confession altar
+  add(tempter.x+5, tempter.y+1, 'K');           // encounter 1 trigger (Tempter)
+  add(brother.x+4, brother.y+1, 'B');          // encounter 2 trigger (Brother)
+  add(ladder.x+2, ladder.y+2, 'P');          // encounter 3 trigger (Demon of Pride)
+  add(ladder.x+2, ladder.y+4, 'L');          // Ladder gate (goal)
+
+  // --- icons / columns -----------------------------------------------------------
+  // decor codes
+  const icon     = 'V'
+  const pew      = 'w'
+  const column   = 'c'
+  const fountain = 'F'
+  // icons (banners) in chapel + court
+  
+
+
+  // columns
+   add(18, 4, 'c'); add(28, 16, 'c'); add(31, 16, 'c');
+  
+
+  //court decor
+  add(court.x+0, court.y+0, 'V');
+  add(court.x+0, court.y+4, 'V');
+  add(court.x+3, court.y+2, 'c');
+  add(court.x+7, court.y+2, 'F'); //fountain
+  
+  //chapel decor
+  add(chapel.x+2, chapel.y+1, pew); 
+  add(chapel.x+3, chapel.y+1, pew); 
+  add(chapel.x+7, chapel.y+1, pew); 
+  add(chapel.x+8, chapel.y+1, pew); 
+  add(chapel.x+2, chapel.y+3, pew); 
+  add(chapel.x+3, chapel.y+3, pew);
+  add(chapel.x+7, chapel.y+3, pew); 
+  add(chapel.x+8, chapel.y+3, pew);
+
+
+  return { grid: g, cells, rooms: { court, chapel, tempter, brother, ladder } };
+}
+
+function printLevel(LEVEL){
+  for (var y in LEVEL.grid){
+    console.log(LEVEL.grid[y].join("")+" - "+y)
+  }
+}
+
+export const LEVEL = buildLevelGridNew();
 
 export function validateLevel() {
   const problems = [];
@@ -122,3 +211,6 @@ export function validateLevel() {
   for (const t of ['S', 'E', 'A', 'K', 'B', 'P', 'L']) if (!counts[t]) problems.push(`missing ${t}`);
   return { ok: problems.length === 0, problems, counts };
 }
+
+//console.log(LEVEL.grid)
+printLevel(LEVEL)
