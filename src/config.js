@@ -213,4 +213,4 @@ export function validateLevel() {
 }
 
 //console.log(LEVEL.grid)
-printLevel(LEVEL)
+//printLevel(LEVEL) //Uncomment this for map editing
