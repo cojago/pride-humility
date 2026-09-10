@@ -52,71 +52,7 @@ function carveCol(g, x, y0, y1) {
   for (let j = Math.min(y0, y1); j <= Math.max(y0, y1); j++) g[j][x] = F;
 }
 
-/*
 function buildLevelGrid() {
-  const g = makeGrid(MAP_W, MAP_H, W);
-
-  // --- rooms ---------------------------------------------------------------
-  //const room = {x: start, y: start, w: width, h: height}
-
-    const court   = { x: 2, y: 2, w: 10, h: 5 };   // gate court (open sky)
-  const chapel  = { x: 15, y: 2, w: 12, h: 6 };  // confession + elder
-  const tempter = { x: 2, y: 14, w: 11, h: 5 };  // encounter 1
-  const brother = { x: 15, y: 14, w: 10, h: 5 }; // encounter 2
-  const ladder  = { x: 27, y: 14, w: 5, h: 5 };  // encounter 3 + Ladder gate
-  
-
-  for (const r of [court, chapel, tempter, brother, ladder]) carveRoom(g, r.x, r.y, r.w, r.h);
-
-  // --- corridors (a gentle U) ----------------------------------------------
-  carveRow(g, 4, 12, 14);          // court -> chapel
-  carveCol(g, 20, 8, 13);          // chapel -> bottom spine
-  carveRow(g, 13, 2, 31);          // bottom spine (tempter -> brother -> ladder)
-  carveCol(g, 7, 7, 12);           // court -> bottom spine (left leg)
-
-  // --- wood floors in chapel, brother's cell --------------------------------
-  for (const [rx, ry, rw, rh] of [[chapel.x, chapel.y, chapel.w, chapel.h], [brother.x, brother.y, brother.w, brother.h]]) {
-    for (let j = ry; j < ry + rh; j++) for (let i = rx; i < rx + rw; i++) if (g[j][i] === F) g[j][i] = '_';
-  }
-
-  const cells = new Map(); // 'i,j' -> tile
-  const floorTiles = new Set(['.', '_']);
-  const add = (x, y, t) => {
-    if (x < 0 || y < 0 || x >= MAP_W || y >= MAP_H) return;
-    if (!floorTiles.has(g[y][x])) return;
-    g[y][x] = t;
-    cells.set(`${x},${y}`, t);
-  };
-
-  // --- key spots (placed first so decor can't claim their cells) ------------------
-  add(6, 4, 'S');            // pilgrim start
-  add(18, 5, 'E');           // elder (NPC)
-  add(25, 4, 'A');           // confession altar
-  add(7, 14, 'K');           // encounter 1 trigger (Tempter)
-  add(20, 14, 'B');          // encounter 2 trigger (Brother)
-  add(29, 14, 'P');          // encounter 3 trigger (Demon of Pride)
-  add(30, 18, 'L');          // Ladder gate (goal)
-
-  // --- icons / columns -----------------------------------------------------------
-  // (no candles — the street is open air in daylight)
-
-  // icons (banners) in chapel + court
-  add(2, 2, 'V'); add(2, 6, 'V'); add(15, 2, 'V'); add(26, 2, 'V'); add(27, 14, 'V');
-  add(15, 6, 'V'); add(26, 6, 'V'); add(30, 18, 'V');
-
-  // columns
-  add(5, 4, 'c'); add(18, 4, 'c'); add(28, 16, 'c'); add(31, 16, 'c');
-
-  // fountain in the gate court + pews in the chapel
-  add(9, 4, 'F');
-  add(16, 3, 'w'); add(17, 3, 'w'); add(21, 3, 'w'); add(22, 3, 'w');
-  add(16, 6, 'w'); add(17, 6, 'w');
-
-  return { grid: g, cells, rooms: { court, chapel, tempter, brother, ladder } };
-}
-*/
-
-function buildLevelGridNew() {
   const g = makeGrid(MAP_W, MAP_H, W);
 
   // --- rooms ---------------------------------------------------------------
@@ -196,14 +132,14 @@ function buildLevelGridNew() {
 
   return { grid: g, cells, rooms: { court, chapel, tempter, brother, ladder } };
 }
-
+//debugging and editing purposes
 function printLevel(LEVEL){
   for (var y in LEVEL.grid){
     console.log(LEVEL.grid[y].join("")+" - "+y)
   }
 }
 
-export const LEVEL = buildLevelGridNew();
+export const LEVEL = buildLevelGrid();
 
 export function validateLevel() {
   const problems = [];
@@ -216,4 +152,4 @@ export function validateLevel() {
 }
 
 //console.log(LEVEL.grid)
-printLevel(LEVEL)
+//printLevel(LEVEL)
